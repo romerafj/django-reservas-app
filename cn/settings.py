@@ -86,33 +86,37 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cn.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        # La URL de conexión a la base de datos se toma de la variable de entorno DATABASE_URL.
-        # Si DATABASE_URL no está definida (ej. en desarrollo local), se usa la configuración de MySQL por defecto.
-        # Es crucial para Render que DATABASE_URL sea la principal fuente de verdad.
-        default=os.environ.get('DATABASE_URL', 'mysql://app_vuelos:Aa918865512@127.0.0.1:3306/reservas_bd?charset=utf8mb4'),
-        conn_max_age=600 # Opcional: Ayuda a evitar conexiones "zombie" con la base de datos
-    )
+# Definimos una configuración base para MySQL local
+# Esto es lo que se usará si no hay DATABASE_URL (en desarrollo local)
+LOCAL_MYSQL_DB_CONFIG = {
+    'ENGINE': 'django.db.backends.mysql',
+    'NAME': 'reservas_bd',
+    'USER': 'app_vuelos',
+    'PASSWORD': 'Aa918865512',
+    'HOST': '127.0.0.1',
+    'PORT': '3306',
+    'OPTIONS': {'charset': 'utf8mb4'},
+    'CONN_MAX_AGE': 600,
 }
 
-# --- INICIO DE LA CORRECCIÓN CLAVE ---
-# Aseguramos que si estamos en Render (y, por lo tanto, DATABASE_URL existe),
-# el motor de la base de datos se establezca a PostgreSQL.
-# Esto evita que Django intente conectar a MySQL en Render.
+# La configuración por defecto será la de MySQL local
+DATABASES = {
+    'default': LOCAL_MYSQL_DB_CONFIG
+}
+
+# Si DATABASE_URL está presente (significa que estamos en Render o un entorno similar)
+# entonces sobrescribimos la configuración 'default' para usar PostgreSQL.
 if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(
+        default=os.environ['DATABASE_URL'], # Forzamos el uso de DATABASE_URL
+        conn_max_age=600,
+        ssl_require=True # Esto es MUY IMPORTANTE para PostgreSQL en Render
+    )
+    # Render usa psycopg2 (PostgreSQL), así que asegúrate de que el ENGINE sea correcto.
     DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
-# --- FIN DE LA CORRECCIÓN CLAVE ---
-
-
-# La parte de charset para MySQL sigue siendo útil para desarrollo local si el motor es MySQL
-if DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
-    DATABASES['default']['OPTIONS'] = {'charset': 'utf8mb4'}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
