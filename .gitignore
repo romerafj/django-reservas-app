@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Environments
+env/
+venv/
+.env # Archivo para variables de entorno locales (si lo usas)
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Django stuff:
+*.log
+*.pot
+*.mo
+*.sqlite3 # ¡MUY IMPORTANTE! Si usas SQLite localmente, NO subas este archivo.
+db.sqlite3 # Otra forma común de nombrar la DB SQLite
+
+# Static files (generados por collectstatic)
+staticfiles/
+
+# Media files (archivos subidos por usuarios)
+media/
+
+# macOS files
+.DS_Store

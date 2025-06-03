@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Detalle de la Reserva</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .detalle-reserva {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            /* Ajusta el minmax según necesites */
+            grid-gap: 15px;
+        }
+
+        .campo {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .campo strong {
+            font-weight: bold;
+            color: #5cb85c;
+            /* Verde para resaltar */
+            display: block;
+            /* Para que el strong ocupe toda la línea */
+        }
+
+        .acciones {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            /* Añadido margen inferior para separar del volver */
+        }
+
+        .acciones a {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            text-decoration: none;
+            background-color: #007bff;
+            /* Azul para los botones */
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .acciones a:hover {
+            background-color: #0056b3;
+        }
+
+        .volver {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .volver a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .volver a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Detalle de la Reserva</h1>
+
+    <div class="detalle-reserva">
+        <div class="campo"><strong>Activa:</strong> {{ reserva.activa|yesno:"Sí,No" }}</div>
+        <div class="campo"><strong>Origen:</strong> {{ reserva.origen }}</div>
+        <div class="campo"><strong>Destino:</strong> {{ reserva.destino }}</div>
+        <div class="campo"><strong>Fecha Reserva:</strong> {{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</div>
+        <div class="campo"><strong>Fecha Vuelo:</strong> {{ reserva.fecha_vuelo|date:"d/m/Y"|default:"-" }}</div>
+        <div class="campo"><strong>Fecha Emisión:</strong> {{ reserva.fecha_emision|date:"d/m/Y"|default:"-" }}</div>
+        <div class="campo"><strong>Fecha Depósito:</strong> {{ reserva.fecha_deposito|date:"d/m/Y"|default:"-" }}</div>
+        <div class="campo"><strong>Fecha Pago Total:</strong> {{ reserva.fecha_pago_total|date:"d/m/Y"|default:"-" }}
+        </div>
+        <div class="campo"><strong>Compañía:</strong> {{ reserva.compania }}</div>
+        <div class="campo"><strong>Localizador:</strong> {{ reserva.localizador|default:"-" }}</div>
+        <div class="campo"><strong>Notas:</strong> {{ reserva.notas|default:"-"|linebreaksbr }}</div>
+        <div class="campo"><strong>Depósito Realizado:</strong> {{ reserva.deposito_realizado|yesno:"Sí,No" }}</div>
+        <div class="campo"><strong>Emitida:</strong> {{ reserva.emitida|yesno:"Sí,No" }}</div>
+        <div class="campo"><strong>Pagado Total:</strong> {{ reserva.pagado_total|yesno:"Sí,No" }}</div>
+    </div>
+
+    <div class="acciones">
+        <a href="{% url 'modificar_reserva' reserva.id %}">Modificar Reserva</a>
+        <a href="{% url 'eliminar_reserva' reserva.id %}">Eliminar Reserva</a>
+    </div>
+
+    <div class="volver">
+        <a href="{% url 'lista_reservas' %}">Volver a la lista de reservas</a>
+    </div>
+</body>
+
+</html>

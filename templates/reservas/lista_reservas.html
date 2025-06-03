@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Lista de Reservas</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .filtros {
+            margin-bottom: 15px;
+            text-align: left;
+            /* Alinea los botones a la izquierda */
+        }
+
+        .filtros a {
+            display: inline-block;
+            padding: 8px 12px;
+            text-decoration: none;
+            background-color: #007bff;
+            /* Azul para los botones */
+            color: white;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-right: 10px;
+            /* Espacio entre los botones */
+        }
+
+        .filtros a:hover {
+            background-color: #0056b3;
+        }
+
+        .config-recordatorio {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .config-recordatorio a {
+            text-decoration: none;
+            background-color: #f0ad4e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .config-recordatorio a:hover {
+            background-color: #d9534f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #5cb85c;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #e0f7fa;
+        }
+
+        .acciones {
+            text-align: center;
+        }
+
+        .acciones a {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 5px;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .acciones a:hover {
+            background-color: #0056b3;
+        }
+
+        .no-reservas {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #777;
+        }
+
+        .crear-nueva {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .crear-nueva a {
+            display: inline-block;
+            padding: 10px 15px;
+            text-decoration: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .crear-nueva a:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Lista de Reservas</h1>
+
+    <div class="filtros">
+        <a href="{% url 'lista_reservas' %}?estado=activa">Mostrar Activas</a>
+        <a href="{% url 'lista_reservas' %}?estado=desactivada">Mostrar Inactivas</a>
+        <a href="{% url 'lista_reservas' %}">Mostrar Todas</a>
+    </div>
+
+    <div class="config-recordatorio">
+        <a href="{% url 'configuracion_recordatorios' %}">Configurar Recordatorios</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Fecha Vuelo</th>
+                <th>Compañía</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reserva in reservas %}
+            <tr>
+                <td>{{ reserva.origen }}</td>
+                <td>{{ reserva.destino }}</td>
+                <td>{{ reserva.fecha_vuelo|date:"d/m/Y" }}</td>
+                <td>{{ reserva.compania }}</td>
+                <td class="acciones">
+                    <a href="{% url 'detalle_reserva' reserva.id %}">Ver</a>
+                    <a href="{% url 'modificar_reserva' reserva.id %}">Modificar</a>
+                    <a href="{% url 'eliminar_reserva' reserva.id %}">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td class="no-reservas" colspan="5">No hay reservas disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="crear-nueva">
+        <a href="{% url 'crear_reserva' %}">Crear Nueva Reserva</a>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Crear Nueva Reserva</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="email"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        .form-group input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        .errorlist {
+            color: red;
+            margin-top: 5px;
+        }
+
+        button[type="submit"] {
+            background-color: #28a745;
+            /* Verde para crear */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1e7e34;
+        }
+
+        .volver {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .volver a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .volver a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Crear Nueva Reserva</h1>
+    <form method="post" id="reservaForm">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group" id="form-group-{{ field.id_for_label }}">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+            <ul class="errorlist">{{ field.errors }}</ul>
+            {% endif %}
+            {% if field.help_text %}
+            <small style="color: #777;">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit">Crear Reserva</button>
+    </form>
+    <div class="volver">
+        <a href="{% url 'lista_reservas' %}">Volver a la lista de reservas</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tipoClienteSelect = document.getElementById('id_tipo_cliente');
+            const nombreAgenciaGroup = document.getElementById('form-group-id_nombre_agencia');
+
+            function toggleNombreAgenciaVisibility() {
+                if (tipoClienteSelect.value === 'AD_HOC' || tipoClienteSelect.value === 'CATALOGO') {
+                    nombreAgenciaGroup.style.display = 'block';
+                } else {
+                    nombreAgenciaGroup.style.display = 'none';
+                }
+            }
+
+            // Mostrar/ocultar al cargar la página
+            toggleNombreAgenciaVisibility();
+
+            // Mostrar/ocultar al cambiar la selección
+            tipoClienteSelect.addEventListener('change', toggleNombreAgenciaVisibility);
+        });
+    </script>
+</body>
+
+</html>
