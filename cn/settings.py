@@ -49,15 +49,15 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages', # Asegúrate de que esta línea esté presente
+    'django.contrib.messages',
     'django.contrib.staticfiles',
-    'reservas', 
-    
+    'reservas',
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Añadido WhiteNoiseMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -75,7 +75,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug', # No estaba, pero es común en dev
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -92,18 +92,25 @@ WSGI_APPLICATION = 'cn.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        # Render inyectará DATABASE_URL para PostgreSQL.
-        # Si no se encuentra DATABASE_URL (ej. en desarrollo local),
-        # usaremos la configuración MySQL por defecto.
+        # La URL de conexión a la base de datos se toma de la variable de entorno DATABASE_URL.
+        # Si DATABASE_URL no está definida (ej. en desarrollo local), se usa la configuración de MySQL por defecto.
+        # Es crucial para Render que DATABASE_URL sea la principal fuente de verdad.
         default=os.environ.get('DATABASE_URL', 'mysql://app_vuelos:Aa918865512@127.0.0.1:3306/reservas_bd?charset=utf8mb4'),
         conn_max_age=600 # Opcional: Ayuda a evitar conexiones "zombie" con la base de datos
     )
 }
 
-# OPCIONAL PERO RECOMENDADO: Asegurarte de que la opción 'charset' se pase correctamente
-# Esto es un poco más avanzado, pero asegura que MySQL siga usando utf8mb4 si es tu default
-# No es estrictamente necesario para que funcione, pero si tienes problemas de caracteres, puede ser útil.
-if 'mysql' in DATABASES['default']['ENGINE']:
+# --- INICIO DE LA CORRECCIÓN CLAVE ---
+# Aseguramos que si estamos en Render (y, por lo tanto, DATABASE_URL existe),
+# el motor de la base de datos se establezca a PostgreSQL.
+# Esto evita que Django intente conectar a MySQL en Render.
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+# --- FIN DE LA CORRECCIÓN CLAVE ---
+
+
+# La parte de charset para MySQL sigue siendo útil para desarrollo local si el motor es MySQL
+if DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
     DATABASES['default']['OPTIONS'] = {'charset': 'utf8mb4'}
 
 
