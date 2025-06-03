@@ -38,9 +38,10 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 # OPCIONAL: Si quieres que tu proyecto siga funcionando en localhost durante el desarrollo
 # cuando DEBUG sea True, puedes añadir esto:
-# if DEBUG:
-#     ALLOWED_HOSTS.append('127.0.0.1')
-#     ALLOWED_HOSTS.append('localhost')
+if DEBUG:
+    ALLOWED_HOSTS.append('127.0.0.1')
+    ALLOWED_HOSTS.append('localhost')
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,16 +49,15 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
+    'django.contrib.messages', # Asegúrate de que esta línea esté presente
     'django.contrib.staticfiles',
     'reservas', 
-    
     
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Añadido WhiteNoiseMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,10 +71,11 @@ ROOT_URLCONF = 'cn.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'cn' / 'templates'],  # Añade esta línea
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'cn' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug', # No estaba, pero es común en dev
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -141,26 +142,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # ¡AÑADIDO! Donde se recolectarán los estáticos en producción
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/reservas/'  # Redirige al usuario a la lista de reservas después del login exitoso
+LOGIN_REDIRECT_URL = '/reservas/'   # Redirige al usuario a la lista de reservas después del login exitoso
 LOGOUT_REDIRECT_URL = '/accounts/login/' # Redirige al usuario a la página de login después del logout
 
 
-
-
-# cn/settings.py
-# cn/settings.py
-
+# Configuración de Correo Electrónico
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'  # Servidor SMTP de Brevo
-EMAIL_PORT = 587  # Puerto SMTP de Brevo
-EMAIL_HOST_USER = '8d67f9001@smtp-brevo.com'  # Tu Login de Brevo
-EMAIL_HOST_PASSWORD = 'avLQDV5cMPmHxysE'  # Reemplaza con tu Master Password de Brevo
-EMAIL_USE_TLS = True  # Usar TLS es recomendado
-DEFAULT_FROM_EMAIL = 'romerafj@gmail.com'
-
+EMAIL_HOST = 'smtp-relay.brevo.com'   # Servidor SMTP de Brevo
+EMAIL_PORT = 587    # Puerto SMTP de Brevo
+# ¡IMPORTANTE! Las credenciales de correo deben ir en variables de entorno por seguridad.
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'tu_usuario_brevo_local') # Leer de variable de entorno
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'tu_password_brevo_local') # Leer de variable de entorno
+EMAIL_USE_TLS = True    # Usar TLS es recomendado
+DEFAULT_FROM_EMAIL = 'romerafj@gmail.com' # Si esta dirección es fija, puede quedarse así. Si no, también variable de entorno.
