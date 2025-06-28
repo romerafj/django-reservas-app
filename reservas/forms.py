@@ -8,7 +8,7 @@ class ReservaForm(forms.ModelForm):
     class Meta:
         model = Reserva
         fields = ['activa', 'origen', 'destino', 'fecha_vuelo', 'fecha_emision',
-                  'fecha_deposito', 'fecha_pago_total', 'compania', 'localizador',
+                  'fecha_deposito', 'fecha_pago_total', 'compania', 'pnr',
                   'notas', 'deposito_realizado', 'emitida', 'pagado_total',
                   'email_notificacion', 'forma_pago', 'importe_deposito',
                   'fecha_cancelacion_plazas', 'observaciones_cancelacion_plazas',
