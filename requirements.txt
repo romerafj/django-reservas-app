@@ -4,10 +4,7 @@ colorama==0.4.6
 crontab==1.0.4
 dj-database-url==3.0.0
 Django==5.2.1
-<<<<<<< HEAD
-=======
 
->>>>>>> d68002ef1586ff9a53fce13cc16d5dcddd3a0c89
 freezegun==1.5.1
 gunicorn==23.0.0
 mysqlclient==2.2.7
