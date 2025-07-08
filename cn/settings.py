@@ -1,39 +1,32 @@
 import os
 import dj_database_url
 from pathlib import Path
-from dotenv import load_dotenv # Good, keep this line
+from dotenv import load_dotenv
 
-load_dotenv() # Good, keep this line. It loads variables from your .env file.
+# Carga las variables de entorno desde el archivo .env si existe (para desarrollo local)
+load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Rutas del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Configuración del scheduler (si no lo estás usando, considera eliminar esta línea)
 SCHEDULER_AUTOSTART = True
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# With dotenv, this will now correctly get the SECRET_KEY from your .env locally
-# and from Render's environment variables in production.
-# No need for a fallback string here, as os.environ.get will return None if not set,
-# which is handled by Django's startup checks.
+# Clave secreta (OBTENIDA DE LAS VARIABLES DE ENTORNO)
+# ¡IMPORTANTE!: Asegúrate de que SECRET_KEY esté configurada en las variables de entorno de Railway
+# y en tu archivo .env local.
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# Reads 'DEBUG' from environment variables. 'False' is the default if not set.
+# Modo DEBUG (OBTENIDO DE LAS VARIABLES DE ENTORNO)
+# En producción (Railway), DEBUG debe ser False. En desarrollo local, True.
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
-# Define ALLOWED_HOSTS
-# Reads 'ALLOWED_HOSTS' from environment variables.
-# In local, it comes from your .env (e.g., '127.0.0.1,localhost').
-# In Render, it comes from Render's config (e.g., 'your-app.onrender.com').
-# The 'if DEBUG' block for appending localhost/127.0.0.1 is now redundant
-# because you're explicitly defining it in your .env. Removing it simplifies the logic.
+# Hosts permitidos (OBTENIDOS DE LAS VARIABLES DE ENTORNO)
+# Para Railway, esto incluirá el dominio de tu aplicación. Para local, '127.0.0.1,localhost'.
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
-# Application definition
+# Definición de aplicaciones Django
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,12 +34,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'reservas', # Make sure 'reservas' is listed only once here.
+    'reservas', # Asegúrate de que tu app 'reservas' esté listada aquí
 ]
 
+# Middlewares
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Para servir archivos estáticos en producción
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -55,8 +49,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URLs del proyecto
 ROOT_URLCONF = 'cn.urls'
 
+# Configuración de plantillas
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -67,21 +63,18 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.messages',
             ],
         },
     },
 ]
 
+# Aplicación WSGI
 WSGI_APPLICATION = 'cn.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# Define a base configuration for local MySQL
-# This will be used if DATABASE_URL is NOT present (i.e., in local development
-# unless you specifically set DATABASE_URL in your .env for local PostgreSQL testing).
-LOCAL_MYSQL_DB_CONFIG = {
+# Configuración de Base de Datos
+# Configuración para desarrollo local con MySQL
+LOCAL_DB_CONFIG = {
     'ENGINE': 'django.db.backends.mysql',
     'NAME': 'reservas_bd',
     'USER': 'app_vuelos',
@@ -92,55 +85,32 @@ LOCAL_MYSQL_DB_CONFIG = {
     'CONN_MAX_AGE': 600,
 }
 
-import os
-import dj_database_url
-
-# ... (otras configuraciones, SECRET_KEY, DEBUG, ALLOWED_HOSTS, etc.) ...
-
-# Configuración de la base de datos
-# Por defecto, se usa DATABASE_URL si está presente (para Railway/producción)
+# Decide qué configuración de base de datos usar
+# Si DATABASE_URL está presente (en Railway/producción), usa PostgreSQL.
+# De lo contrario, usa la configuración local (MySQL o SQLite).
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ['DATABASE_URL'],
             conn_max_age=600,
-            ssl_require=True # Esto es para Render, para Railway no siempre es necesario pero no molesta
+            ssl_require=True # Mantenlo, no molesta y es bueno para la seguridad con DBs externas
         )
     }
-    # Render/Railway usa psycopg2 (PostgreSQL), así que asegúrate de que el ENGINE sea correcto.
-    # dj_database_url ya lo hace si la URL es 'postgresql://', así que esta línea es redundante con dj_database_url.config()
-    # pero podemos dejarla para mayor claridad o si hay dudas.
+    # Asegura que el motor sea PostgreSQL, aunque dj_database_url ya debería inferirlo
     DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 else:
-    # Si no hay DATABASE_URL (para desarrollo local sin Railway/Render)
-    # Aquí puedes usar tu configuración local de MySQL o SQLite.
+    # Usa la configuración de base de datos local
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql', # O 'django.db.backends.sqlite3'
-            'NAME': 'your_local_db_name', # Ajusta a tu nombre de DB local
-            'USER': 'your_local_user',
-            'PASSWORD': 'your_local_password',
-            'HOST': '127.0.0.1',
-            'PORT': '3306',
-        }
-        # O si usas SQLite localmente:
-        # 'default': {
-        #     'ENGINE': 'django.db.backends.sqlite3',
-        #     'NAME': BASE_DIR / 'db.sqlite3',
-        # }
+        'default': LOCAL_DB_CONFIG
     }
 
-# ... (resto de tu settings.py) ...
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# Validación de contraseñas
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.auth.password_validation.MinimumLengthValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -151,41 +121,35 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# Internacionalización
 LANGUAGE_CODE = 'es'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# Archivos estáticos (CSS, JavaScript, Imágenes)
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Where static files will be collected in production
+# Directorio donde Django recolectará todos los archivos estáticos en producción
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+# Configuración de campos de clave primaria
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/reservas/' # Redirect user to reservations list after successful login
-LOGOUT_REDIRECT_URL = '/accounts/login/' # Redirect user to login page after logout
+# URLs de redirección para autenticación
+LOGIN_REDIRECT_URL = '/reservas/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-
-# Email Configuration
+# Configuración de Email (Brevo/SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com' # Brevo SMTP Server
-EMAIL_PORT = 587 # Brevo SMTP Port
-# IMPORTANT! Email credentials should be in environment variables for security.
-# Now reads directly from environment variables (from .env locally, from Render in production).
-# Removed local fallback, as it's handled by .env.
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Credenciales de email (OBTENIDAS DE LAS VARIABLES DE ENTORNO)
+# ¡IMPORTANTE!: Asegúrate de que EMAIL_HOST_USER y EMAIL_HOST_PASSWORD estén
+# configuradas en las variables de entorno de Railway y en tu archivo .env local.
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = True # TLS is recommended
-DEFAULT_FROM_EMAIL = 'romerafj@gmail.com' # If this address is fixed, it can stay. Otherwise, also an environment variable.
+DEFAULT_FROM_EMAIL = 'romerafj@gmail.com'
