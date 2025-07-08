@@ -6,6 +6,14 @@ from dotenv import load_dotenv
 # Carga las variables de entorno desde el archivo .env si existe (para desarrollo local)
 load_dotenv()
 
+# === DEBUG START ===
+print("--- DEBUG: settings.py cargado desde ruta:", __file__)
+import sys
+print("--- DEBUG: sys.path:", sys.path)
+print(f"DEBUG_VAR_ENV: {os.getenv('DEBUG')}")
+print(f"ALLOWED_HOSTS_ENV: {os.environ.get('ALLOWED_HOSTS')}")
+# === DEBUG END ===
+
 # Rutas del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -64,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.messages',
+                ('--- DEBUG: messages context processor detectado ---',), # <--- ¡ESTA ES LA LÍNEA NUEVA/CORREGIDA!
             ],
         },
     },
