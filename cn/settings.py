@@ -92,21 +92,45 @@ LOCAL_MYSQL_DB_CONFIG = {
     'CONN_MAX_AGE': 600,
 }
 
-# The default database configuration will be local MySQL
-DATABASES = {
-    'default': LOCAL_MYSQL_DB_CONFIG
-}
+import os
+import dj_database_url
 
-# If DATABASE_URL is present (e.g., in Render),
-# then override the 'default' configuration to use PostgreSQL.
+# ... (otras configuraciones, SECRET_KEY, DEBUG, ALLOWED_HOSTS, etc.) ...
+
+# Configuración de la base de datos
+# Por defecto, se usa DATABASE_URL si está presente (para Railway/producción)
 if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.config(
-        default=os.environ['DATABASE_URL'], # Force the use of DATABASE_URL
-        conn_max_age=600,
-        ssl_require=True # VERY IMPORTANT for PostgreSQL on Render
-    )
-    # Render uses psycopg2 (PostgreSQL), so ensure the ENGINE is correct.
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ['DATABASE_URL'],
+            conn_max_age=600,
+            ssl_require=True # Esto es para Render, para Railway no siempre es necesario pero no molesta
+        )
+    }
+    # Render/Railway usa psycopg2 (PostgreSQL), así que asegúrate de que el ENGINE sea correcto.
+    # dj_database_url ya lo hace si la URL es 'postgresql://', así que esta línea es redundante con dj_database_url.config()
+    # pero podemos dejarla para mayor claridad o si hay dudas.
     DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
+else:
+    # Si no hay DATABASE_URL (para desarrollo local sin Railway/Render)
+    # Aquí puedes usar tu configuración local de MySQL o SQLite.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql', # O 'django.db.backends.sqlite3'
+            'NAME': 'your_local_db_name', # Ajusta a tu nombre de DB local
+            'USER': 'your_local_user',
+            'PASSWORD': 'your_local_password',
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
+        }
+        # O si usas SQLite localmente:
+        # 'default': {
+        #     'ENGINE': 'django.db.backends.sqlite3',
+        #     'NAME': BASE_DIR / 'db.sqlite3',
+        # }
+    }
+
+# ... (resto de tu settings.py) ...
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
