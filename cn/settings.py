@@ -64,15 +64,14 @@ ROOT_URLCONF = 'cn.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'cn' / 'templates'],
+        'DIRS': [], # Puedes añadir BASE_DIR / 'templates' si tienes plantillas globales
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.template.context_processors.messages',
-                ('--- DEBUG: messages context processor detectado ---',), # <--- ¡ESTA ES LA LÍNEA NUEVA/CORREGIDA!
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
