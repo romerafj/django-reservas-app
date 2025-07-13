@@ -18,37 +18,40 @@ if __name__ == "__main__":
     now_spain = timezone.localtime(timezone.now(), spain_tz)
     today = now_spain.date()
 
-    # --- CAMBIO IMPORTANTE: Obtener la URL base del entorno o usar la de Render directamente ---
-    # Intentamos obtener SITE_URL, si no existe, usamos RENDER_EXTERNAL_HOSTNAME,
-    # y si nada de eso está, usamos la URL de Render directamente o la local.
+    # --- Obtener la URL base del entorno o usar la de Render directamente ---
     base_url = os.environ.get('SITE_URL') or os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
     if not base_url:
-        # Si las variables de entorno no están configuradas, forzamos la URL de Render para producción
-        if os.environ.get('RENDER'): # 'RENDER' es una variable de entorno que Render establece
+        if os.environ.get('RENDER'):
             base_url = 'mis-reservas-django.onrender.com'
-        else: # Si no es Render, asumimos desarrollo local
+        else:
             base_url = '127.0.0.1:8000'
 
     if not base_url.startswith('http'):
-        base_url = f'https://{base_url}' # Añade https:// si no está ya
+        base_url = f'https://{base_url}'
 
     print(f"Ejecutando script de envío de correos (hora España): {now_spain.strftime('%Y-%m-%d %H:%M:%S %Z%z')}")
-    print(f"URL base utilizada: {base_url}") # Útil para depurar
+    print(f"URL base utilizada: {base_url}")
 
     try:
         configuracion = ConfiguracionRecordatorio.objects.first()
         if configuracion:
             reservas_a_notificar = []
             asunto = 'Recordatorio de vuelo'
-            # --- NUEVO: Tu dirección de correo para la copia ---
             copia_oculta_email = 'romerafj@gmail.com'
 
-            for reserva in Reserva.objects.exclude(email_notificacion__isnull=True).exclude(email_notificacion__exact=''):
+            # --- CAMBIO AQUÍ: Filtrar solo por reservas activas (activa=True) ---
+            # También mantenemos los filtros para email_notificacion no nulo/vacío
+            active_reservas = Reserva.objects.filter(activa=True).exclude(
+                email_notificacion__isnull=True
+            ).exclude(
+                email_notificacion__exact=''
+            )
+
+            for reserva in active_reservas: # Iteramos sobre las reservas activas
                 # Notificación para fecha_deposito
                 if reserva.fecha_deposito:
                     dias_deposito = (reserva.fecha_deposito - today).days
-                    # Queremos avisar si la fecha está entre -X días (pasados) y +X días (futuros)
                     if -configuracion.dias_antes_deposito <= dias_deposito <= configuracion.dias_antes_deposito:
                         mensaje = f'Recordatorio: El depósito del vuelo con PNR {reserva.pnr} con origen en {reserva.origen} y destino a {reserva.destino} vence en {dias_deposito} días.'
                         if dias_deposito < 0:
@@ -82,8 +85,6 @@ if __name__ == "__main__":
             correos_enviados = set()
             for email, mensaje in reservas_a_notificar:
                 if email not in correos_enviados:
-                    # --- CAMBIO: Añadir la copia a la lista de destinatarios ---
-                    # Los destinatarios son [email] (el original) y [copia_oculta_email] (tu correo)
                     send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [email, copia_oculta_email], fail_silently=False)
                     print(f"Enviando recordatorio a {email} (copia a {copia_oculta_email}): {mensaje}")
                     correos_enviados.add(email)
@@ -91,7 +92,7 @@ if __name__ == "__main__":
             if correos_enviados:
                 print(f"Se enviaron recordatorios a {len(correos_enviados)} direcciones de correo electrónico.")
             else:
-                print("No hay reservas para notificar hoy según la configuración.")
+                print("No hay reservas activas para notificar hoy según la configuración.") # Mensaje actualizado
 
         else:
             print("No se encontró la configuración del recordatorio.")
