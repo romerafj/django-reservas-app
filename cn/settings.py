@@ -99,17 +99,17 @@ LOCAL_DB_CONFIG = {
 if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
-            default=os.environ['DATABASE_URL'],
+            default=os.environ.get('DATABASE_URL'),
             conn_max_age=600,
-            ssl_require=True # Mantenlo, no molesta y es bueno para la seguridad con DBs externas
+            ssl_require=True
         )
     }
-    # Asegura que el motor sea PostgreSQL, aunque dj_database_url ya debería inferirlo
-    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 else:
-    # Usa la configuración de base de datos local
     DATABASES = {
-        'default': LOCAL_DB_CONFIG
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
 
 # Validación de contraseñas
