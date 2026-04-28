@@ -96,7 +96,7 @@ LOCAL_DB_CONFIG = {
 # Decide qué configuración de base de datos usar
 # Si DATABASE_URL está presente (en Railway/producción), usa PostgreSQL.
 # De lo contrario, usa la configuración local (MySQL o SQLite).
-if 'DATABASE_URL' in os.environ:
+if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ['DATABASE_URL'],
