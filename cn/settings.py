@@ -93,25 +93,12 @@ LOCAL_DB_CONFIG = {
     'CONN_MAX_AGE': 600,
 }
 
-# Decide qué configuración de base de datos usar
-# Si DATABASE_URL está presente (en Railway/producción), usa PostgreSQL.
-# De lo contrario, usa la configuración local (MySQL o SQLite).
-if os.environ.get('DATABASE_URL'):
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-            ssl_require=True
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-
+}
 # Validación de contraseñas
 AUTH_PASSWORD_VALIDATORS = [
     {
